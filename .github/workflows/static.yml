@@ -27,6 +27,32 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Patch Google Maps initialization
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path("index.html")
+          s = p.read_text(encoding="utf-8")
+
+          old = """  let map = null;
+          let activeDay = 'all';"""
+
+          new = """  const mapEl = document.getElementById('trip-map');
+          let map = null;
+          let activeDay = 'all';"""
+
+          if new not in s:
+              if old not in s:
+                  raise SystemExit("Google Maps initialization block not found")
+              s = s.replace(old, new, 1)
+
+          s = s.replace("marker.addListener('gmp-click'", "marker.addListener('click'")
+
+          p.write_text(s, encoding="utf-8")
+          print("Google Maps initialization patched")
+          PY
+
       - name: Create Google Maps config
         run: |
           cat > config.js <<'EOF'
