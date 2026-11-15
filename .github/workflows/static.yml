@@ -36,17 +36,28 @@ jobs:
           p = Path("index.html")
           s = p.read_text(encoding="utf-8")
 
-          # Add mapEl once, regardless of indentation/spacing.
           map_el = "const mapEl = document.getElementById('trip-map');"
-          if map_el not in s:
+
+          # IMPORTANT:
+          # The original file already has "const mapEl = ..." inside showConfigError().
+          # We need another declaration in the Google Maps script scope,
+          # immediately before "let map = null;".
+          scoped_pattern = re.compile(
+              r"(?m)^(\s*)const mapEl = document\.getElementById\('trip-map'\);\s*\n\1let map\s*=\s*null\s*;"
+          )
+
+          if not scoped_pattern.search(s):
               s, count = re.subn(
                   r"(?m)^(\s*)let map\s*=\s*null\s*;",
-                  lambda m: f"{m.group(1)}{map_el}\n{m.group(1)}let map = null;",
+                  lambda m: (
+                      f"{m.group(1)}{map_el}\n"
+                      f"{m.group(1)}let map = null;"
+                  ),
                   s,
                   count=1
               )
               if count != 1:
-                  raise SystemExit("Could not find 'let map = null;' in index.html")
+                  raise SystemExit("Could not patch Google Maps scope: 'let map = null;' not found")
 
           # Stable AdvancedMarker click event.
           s = s.replace(
@@ -54,7 +65,7 @@ jobs:
               "marker.addListener('click'"
           )
 
-          # Correct error helper name if an older version is present.
+          # Correct older error helper name if present.
           s = s.replace(
               "showError('เปิด Google Maps ไม่สำเร็จ:",
               "showConfigError('เปิด Google Maps ไม่สำเร็จ:"
@@ -62,12 +73,12 @@ jobs:
 
           p.write_text(s, encoding="utf-8")
 
-          # Verify the deployed artifact will contain the fix.
+          # Verify mapEl is in the SAME scope as `let map = null`.
           check = p.read_text(encoding="utf-8")
-          if map_el not in check:
-              raise SystemExit("mapEl patch verification failed")
+          if not scoped_pattern.search(check):
+              raise SystemExit("Google Maps scope verification failed")
 
-          print("Google Maps patch OK")
+          print("Google Maps scope patch OK")
           PY
 
       - name: Create Google Maps config
