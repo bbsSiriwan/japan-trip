@@ -161,7 +161,7 @@ th{background:#fafaff;font-size:13px;color:#5f6675}
   body{padding-bottom:80px}
   .floating-nav{display:none}
   .mobile-dock{
-    display:grid;grid-template-columns:repeat(4,1fr);position:fixed;
+    display:grid;grid-template-columns:repeat(5,1fr);position:fixed;
     left:12px;right:12px;bottom:10px;z-index:1000;padding:8px;
     border-radius:20px;background:rgba(255,255,255,.86);
     backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
@@ -255,19 +255,104 @@ th{background:#fafaff;font-size:13px;color:#5f6675}
   .choice-top{flex-direction:column}
 }
 
+
+/* Interactive Trip Map */
+.trip-map-shell{
+  background:linear-gradient(135deg,#fff,#fbfbff);
+  border:1px solid var(--line);border-radius:26px;padding:18px;
+  box-shadow:var(--shadow)
+}
+.trip-map-toolbar{
+  display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px
+}
+.map-day-btn{
+  appearance:none;border:1px solid #e1e4ec;background:#fff;color:#626a7d;
+  border-radius:999px;padding:8px 11px;font:inherit;font-size:12px;font-weight:900;
+  cursor:pointer;transition:.18s ease
+}
+.map-day-btn:hover,.map-day-btn.active{
+  border-color:#7a6df0;background:#f1efff;color:#5d50d8;transform:translateY(-1px)
+}
+#trip-map{
+  height:520px;border-radius:20px;overflow:hidden;border:1px solid #e9ebf2;
+  background:#eef1f6
+}
+.map-note-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px
+}
+.map-note{
+  border:1px solid #e8eaf1;background:#fafbfe;border-radius:16px;padding:12px;
+  color:#596174;font-size:13px
+}
+.map-note b{display:block;color:#30384b;margin-bottom:4px}
+.trip-marker{
+  width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+  background:#6758e8;color:#fff;border:3px solid #fff;
+  box-shadow:0 5px 16px rgba(50,45,115,.28);font-weight:900;font-size:12px
+}
+.trip-marker.hotel{background:#e56da9}
+.trip-marker.attraction{background:#3187df}
+.trip-marker.transport{background:#26a17b}
+.trip-marker.pending{background:#f39a3d}
+.trip-marker.airport{background:#5a6476}
+.leaflet-popup-content{font-family:"Noto Sans Thai","Sarabun","Segoe UI",system-ui,sans-serif;line-height:1.5}
+.leaflet-popup-content b{font-size:14px}
+.map-popup-sub{color:#687083;font-size:12px;margin-top:3px}
+.map-popup-day{font-size:11px;font-weight:900;color:#5d50d8;margin-bottom:4px}
+.map-status{
+  display:flex;align-items:flex-start;gap:8px;margin:0 0 12px;
+  padding:11px 13px;border-radius:15px;background:#f7f8ff;border:1px solid #e5e7f7;
+  color:#4f5870;font-size:13px
+}
+@media(max-width:760px){
+  #trip-map{height:470px}
+  .map-note-grid{grid-template-columns:1fr}
+}
+
+
+
+
+/* Google Maps */
+.google-trip-marker{
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  color:#fff;
+  border:3px solid #fff;
+  box-shadow:0 5px 16px rgba(35,46,70,.25);
+  font-weight:900;
+  font-size:12px;
+  cursor:pointer;
+  user-select:none
+}
+.google-trip-marker.hotel{background:#e55c9f}
+.google-trip-marker.attraction{background:#4f7de8}
+.google-trip-marker.transport{background:#2aa987}
+.google-trip-marker.pending{background:#e69a35}
+.google-trip-marker.airport{background:#566174}
+.gm-style-iw-d{
+  font-family:"Noto Sans Thai","Sarabun","Segoe UI",system-ui,sans-serif!important
+}
+.google-map-ready .google-key-gate{display:none}
+
 </style>
+
 </head>
 <body>
 
 <nav class="floating-nav" aria-label="Trip sections">
   <a href="#flights"><span class="nav-icon">✈️</span><span class="nav-label">Flights</span></a>
-  <a href="#plan"><span class="nav-icon">🗺️</span><span class="nav-label">Trip Plan</span></a>
+  <a href="#plan"><span class="nav-icon">🗓️</span><span class="nav-label">Trip Plan</span></a>
+  <a href="#map"><span class="nav-icon">🗺️</span><span class="nav-label">แผนที่ทริป</span></a>
   <a href="#hotels"><span class="nav-icon">🏨</span><span class="nav-label">Hotels</span></a>
   <a href="#references"><span class="nav-icon">📸</span><span class="nav-label">References</span></a>
 </nav>
 <nav class="mobile-dock" aria-label="Trip sections mobile">
   <a href="#flights"><span class="dock-icon">✈️</span><span>Flights</span></a>
-  <a href="#plan"><span class="dock-icon">🗺️</span><span>Plan</span></a>
+  <a href="#plan"><span class="dock-icon">🗓️</span><span>Plan</span></a>
+  <a href="#map"><span class="dock-icon">🗺️</span><span>แผนที่</span></a>
   <a href="#hotels"><span class="dock-icon">🏨</span><span>Hotels</span></a>
   <a href="#references"><span class="dock-icon">📸</span><span>Ref</span></a>
 </nav>
@@ -275,13 +360,13 @@ th{background:#fafaff;font-size:13px;color:#5f6675}
 <div class="wrap page-shell">
 
 <header class="hero">
-  <div class="pill">🇯🇵 JAPAN TRIP • 4 PEOPLE • UPDATED 14 NOV 2026</div>
+  <div class="pill">🇯🇵 JAPAN TRIP • 4 PEOPLE • UPDATED 15 NOV 2026</div>
   <h1>Tokyo → Fuji → Osaka<br>12/13–18 Apr 2027 ✨</h1>
   <p>อัปเดตจากเที่ยวบินที่ยังมีอยู่ล่าสุด • 2 คู่ • DisneySea 🌊 + Fuji 🗻 + Osaka / USJ 🎢</p>
   <div class="hero-grid">
     <div class="hero-stat"><b>4 คน</b><span>คู่รัก 2 คู่</span></div>
     <div class="hero-stat"><b>5 คืน</b><span>พัก 13–18 เม.ย.</span></div>
-    <div class="hero-stat"><b>4 แผน</b><span>คัดจากเที่ยวบินที่ยังเหลือ</span></div>
+    <div class="hero-stat"><b>3 × 2</b><span>เลือกขาไป 3 • ขากลับ 2</span></div>
     <div class="hero-stat"><b>฿27,650</b><span>เริ่มต้น/คน สำหรับแผนแนะนำ</span></div>
   </div>
 </header>
@@ -296,6 +381,58 @@ th{background:#fafaff;font-size:13px;color:#5f6675}
     <div class="day"><div class="emoji">🗻</div><small>15 เม.ย.</small><b>Kawaguchiko</b><span>Fuji + ออนเซ็น</span></div>
     <div class="day"><div class="emoji">🍜</div><small>16–17 เม.ย.</small><b>Osaka</b><span>Glico + USJ / เที่ยวเมือง</span></div>
     <div class="day"><div class="emoji">🛫</div><small>18 เม.ย.</small><b>บินกลับไทย</b><span>กลับเช้าประหยัด หรือกลับเย็นเที่ยวเพิ่ม</span></div>
+  </div>
+</section>
+
+
+<section class="section-anchor" id="map">
+  <h2 class="section-title">🗺️ แผนที่ทริป — ดูเส้นทางทั้งทริป</h2>
+  <p class="sub">
+    แผนที่อ้างอิงตามลำดับทริปของเราเอง • กดวันที่เพื่อดูเฉพาะช่วงนั้น •
+    สนามบินวันแรกและแผนคืนสุดท้ายจะปรับตามเที่ยวบินที่เลือกใน Flight Builder
+  </p>
+
+  <div class="trip-map-shell">
+    <div class="trip-map-toolbar" aria-label="เลือกวันที่บนแผนที่">
+      <button class="map-day-btn active" type="button" data-map-day="all">✨ ภาพรวม</button>
+      <button class="map-day-btn" type="button" data-map-day="13">13 เม.ย.</button>
+      <button class="map-day-btn" type="button" data-map-day="14">14 เม.ย.</button>
+      <button class="map-day-btn" type="button" data-map-day="15">15 เม.ย.</button>
+      <button class="map-day-btn" type="button" data-map-day="16">16 เม.ย.</button>
+      <button class="map-day-btn" type="button" data-map-day="17">17 เม.ย.</button>
+      <button class="map-day-btn" type="button" data-map-day="18">18 เม.ย.</button>
+    </div>
+
+    <div class="map-status" id="map-flight-status">
+      ✈️ <span>อ้างอิงเที่ยวบินที่เลือกตอนนี้: <strong>ลงสนามบินนาริตะ (NRT)</strong> • กลับเช้า VietJet → แนะนำย้ายไปโซน <strong>ริงกุทาวน์ / สนามบินคันไซ</strong> คืนสุดท้าย</span>
+    </div>
+    <div class="map-status">
+      🗺️ <span><strong>Google Maps Preview</strong> • ใช้สีแผนที่ Google จริง พร้อมหมุดและเส้นทางของทริปเรา</span>
+    </div>
+
+    <div id="trip-map" role="application" aria-label="แผนที่เส้นทางทริปญี่ปุ่น"></div>
+    </div>
+
+    <div class="map-note-grid">
+      <div class="map-note">
+        <b>📍 ลำดับหลัก</b>
+        สนามบินโตเกียว → ไมฮามะ → ดิสนีย์ซี → คาวากุจิโกะ / ฟูจิ → นัมบะ / โดทงโบริ → USJ → สนามบินคันไซ
+      </div>
+      <div class="map-note">
+        <b>🚆 เรื่องเส้นทาง</b>
+        เส้นบนแผนที่ใช้แสดง <strong>ลำดับการเดินทาง</strong> ไม่ใช่เส้นทางรถไฟ/รถบัสจริง
+        ส่วนวิธีเดินทางจริงจะเลือกให้เหมาะกับเวลาและสัมภาระอีกครั้ง
+      </div>
+      <div class="map-note">
+        <b>🏨 คืนสุดท้าย</b>
+        ถ้ากลับ VietJet 08:55 แนะนำโซน <strong>ริงกุทาวน์ / สนามบินคันไซ</strong> •
+        ถ้ากลับ THAI 17:35 สามารถพัก <strong>นัมบะ</strong> ต่อได้
+      </div>
+      <div class="map-note">
+        <b>ℹ️ ตำแหน่ง</b>
+        หมุดเป็นจุดอ้างอิงสำหรับวางแผน และที่พักโอซาก้า / โซนสนามบินคันไซคืนสุดท้ายยังเปลี่ยนได้ตามที่เพื่อน ๆ เลือก
+      </div>
+    </div>
   </div>
 </section>
 
@@ -634,7 +771,7 @@ th{background:#fafaff;font-size:13px;color:#5f6675}
 
 <script>
 (() => {
-  const ids = ['flights','plan','hotels','references'];
+  const ids = ['flights','plan','map','hotels','references'];
   const links = [...document.querySelectorAll('.floating-nav a, .mobile-dock a')];
   const setActive = id => links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + id));
   const sections = ids.map(id => document.getElementById(id)).filter(Boolean);
@@ -643,6 +780,7 @@ th{background:#fafaff;font-size:13px;color:#5f6675}
     if (visible[0]) setActive(visible[0].target.id);
   }, {rootMargin:'-25% 0px -55% 0px', threshold:[0.05,0.25,0.5]});
   sections.forEach(s => observer.observe(s));
+  loadGoogleMapsFromConfig();
 })();
 </script>
 
@@ -694,5 +832,267 @@ th{background:#fafaff;font-size:13px;color:#5f6675}
 })();
 </script>
 
+<script src="./config.js"></script>
+
+<script>
+(() => {
+  const coords = {
+    NRT:{lat:35.76858,lng:140.388714},
+    HND:{lat:35.549678,lng:139.786958},
+    MYSTAYS:{lat:35.63290,lng:139.89200},
+    DISNEYSEA:{lat:35.62667,lng:139.88806},
+    KAWAGUCHIKO:{lat:35.49833,lng:138.76861},
+    FUJI_TOKI:{lat:35.48967,lng:138.775131},
+    NAMBA:{lat:34.663411,lng:135.501911},
+    GLICO:{lat:34.66893,lng:135.50105},
+    USJ:{lat:34.66472,lng:135.43306},
+    RINKU:{lat:34.410456,lng:135.299892},
+    KIX:{lat:34.4385,lng:135.2315}
+  };
+
+  let map = null;
+  let activeDay = 'all';
+  let markers = [];
+  let polylines = [];
+  let infoWindow = null;
+  let googleLoading = false;
+
+  function showConfigError(message){
+    const mapEl = document.getElementById('trip-map');
+    if(!mapEl) return;
+    mapEl.innerHTML = `
+      <div style="
+        height:100%;display:grid;place-items:center;padding:20px;
+        background:linear-gradient(135deg,#eef8f0,#eef6ff);
+        color:#465166;text-align:center;font-family:system-ui,sans-serif">
+        <div style="
+          max-width:430px;background:#fff;border:1px solid #e3e7ee;
+          border-radius:18px;padding:18px;box-shadow:0 12px 30px rgba(38,50,75,.10)">
+          <div style="font-size:28px;margin-bottom:6px">🗺️</div>
+          <b style="display:block;font-size:16px;color:#273247;margin-bottom:6px">Google Maps ยังไม่ได้ตั้งค่า</b>
+          <div style="font-size:12px;line-height:1.6">${message}</div>
+        </div>
+      </div>`;
+  }
+
+  window.gm_authFailure = () => {
+    showConfigError('Google ปฏิเสธ API key นี้ กรุณาตรวจสอบ Demo Key / Maps JavaScript API');
+  };
+
+  function loadGoogleMapsFromConfig(){
+    const key = window.TRIP_CONFIG?.GOOGLE_MAPS_API_KEY?.trim();
+
+    if(!key || key === 'PASTE_YOUR_DEMO_KEY_HERE'){
+      showConfigError('กรุณาใส่ Demo Key ในไฟล์ <code>config.js</code> ก่อนใช้งาน');
+      return;
+    }
+
+    window.__initTripGoogleMap = initMap;
+
+    const s = document.createElement('script');
+    s.src = 'https://maps.googleapis.com/maps/api/js?key=' +
+      encodeURIComponent(key) +
+      '&v=weekly&libraries=marker&callback=__initTripGoogleMap';
+    s.async = true;
+    s.defer = true;
+    s.onerror = () => {
+      showConfigError('โหลด Google Maps ไม่สำเร็จ กรุณาตรวจอินเทอร์เน็ตหรือ API key');
+    };
+    document.head.appendChild(s);
+  }
+  function selectedOutboundAirport(){
+    const o = document.querySelector('input[name="outbound"]:checked');
+    return o && (o.dataset.route || '').includes('HND') ? 'HND' : 'NRT';
+  }
+
+  function earlyReturn(){
+    const r = document.querySelector('input[name="return"]:checked');
+    return !!(r && r.dataset.airline === 'VietJet');
+  }
+
+  function dayData(){
+    const airport = selectedOutboundAirport();
+    const early = earlyReturn();
+    const airportDetail = airport === 'HND'
+      ? 'เที่ยวบินที่เลือกลงสนามบินฮาเนดะ (HND) → เดินทางต่อไปโรงแรม HOTEL MYSTAYS Maihama'
+      : 'เที่ยวบินที่เลือกลงสนามบินนาริตะ (NRT) → เดินทางต่อไปโรงแรม HOTEL MYSTAYS Maihama';
+
+    return {
+      '13':{
+        points:[
+          {c:coords[airport],label:'✈',type:'airport',title:airport === 'HND' ? 'สนามบินฮาเนดะ (HND)' : 'สนามบินนาริตะ (NRT)',detail:airportDetail},
+          {c:coords.MYSTAYS,label:'H',type:'hotel',title:'โรงแรม HOTEL MYSTAYS Maihama',detail:'เช็กอินคืน 1–2 • ฐานสำหรับไปโตเกียวดิสนีย์ซี'}
+        ],
+        path:[coords[airport],coords.MYSTAYS], color:'#6d5dfc'
+      },
+      '14':{
+        points:[
+          {c:coords.MYSTAYS,label:'H',type:'hotel',title:'โรงแรม HOTEL MYSTAYS Maihama',detail:'เดินไปโตเกียวดิสนีย์ซีประมาณ 10 นาที'},
+          {c:coords.DISNEYSEA,label:'🌊',type:'attraction',title:'โตเกียวดิสนีย์ซี',detail:'เที่ยวเต็มวัน'}
+        ],
+        path:[coords.MYSTAYS,coords.DISNEYSEA,coords.MYSTAYS], color:'#3187df'
+      },
+      '15':{
+        points:[
+          {c:coords.MYSTAYS,label:'H',type:'hotel',title:'โรงแรม HOTEL MYSTAYS Maihama',detail:'เช็กเอาต์แล้วเดินทางไปฟูจิ'},
+          {c:coords.KAWAGUCHIKO,label:'🚉',type:'transport',title:'สถานีคาวากุจิโกะ',detail:'จุดหลักสำหรับเข้าโซนฟูจิ / ต่อรถรับส่ง'},
+          {c:coords.FUJI_TOKI,label:'H',type:'hotel',title:'ที่พักฟูจิ • Fuji Gran Villa - TOKI -',detail:'คืน 3 • วิลลา + ดาดฟ้า'}
+        ],
+        path:[coords.MYSTAYS,coords.KAWAGUCHIKO,coords.FUJI_TOKI], color:'#28a879'
+      },
+      '16':{
+        points:[
+          {c:coords.FUJI_TOKI,label:'H',type:'hotel',title:'ที่พักฟูจิ • Fuji Gran Villa - TOKI -',detail:'ออกจากฟูจิไปโอซาก้า'},
+          {c:coords.NAMBA,label:'🚉',type:'transport',title:'นัมบะ',detail:'โซนที่พักแนะนำสำหรับคืน 4'},
+          {c:coords.GLICO,label:'📸',type:'attraction',title:'ป้ายกูลิโกะ / โดทงโบริ',detail:'เดินเล่นและถ่ายรูปช่วงเย็น'}
+        ],
+        path:[coords.FUJI_TOKI,coords.NAMBA,coords.GLICO], color:'#ed7f3f'
+      },
+      '17': early ? {
+        points:[
+          {c:coords.NAMBA,label:'N',type:'transport',title:'นัมบะ',detail:'ออกไปยูนิเวอร์แซล สตูดิโอ เจแปน (USJ)'},
+          {c:coords.USJ,label:'🎢',type:'attraction',title:'ยูนิเวอร์แซล สตูดิโอ เจแปน (USJ)',detail:'เที่ยวเต็มวัน / ตามที่กลุ่มตกลง'},
+          {c:coords.RINKU,label:'รอ',type:'pending',title:'ริงกุทาวน์ / โซนสนามบินคันไซ',detail:'คืน 5 • แนะนำเมื่อเลือก VietJet กลับเช้า • โรงแรมยังรอเลือก'}
+        ],
+        path:[coords.NAMBA,coords.USJ,coords.RINKU], color:'#d36db0'
+      } : {
+        points:[
+          {c:coords.NAMBA,label:'N',type:'transport',title:'นัมบะ',detail:'พักโอซาก้าต่อได้เมื่อเลือก THAI กลับเย็น'},
+          {c:coords.USJ,label:'🎢',type:'attraction',title:'ยูนิเวอร์แซล สตูดิโอ เจแปน (USJ)',detail:'เที่ยวเต็มวัน / ตามที่กลุ่มตกลง'}
+        ],
+        path:[coords.NAMBA,coords.USJ,coords.NAMBA], color:'#d36db0'
+      },
+      '18': early ? {
+        points:[
+          {c:coords.RINKU,label:'H',type:'pending',title:'โซนสนามบินคันไซ / ริงกุทาวน์',detail:'ออกจากที่พักใกล้สนามบิน'},
+          {c:coords.KIX,label:'✈',type:'airport',title:'สนามบินนานาชาติคันไซ (KIX)',detail:'VietJet 08:55 → กรุงเทพฯ (BKK)'}
+        ],
+        path:[coords.RINKU,coords.KIX], color:'#5a6476'
+      } : {
+        points:[
+          {c:coords.NAMBA,label:'N',type:'transport',title:'นัมบะ',detail:'มีเวลาเที่ยว / ช้อปเพิ่มก่อนเดินทางไปสนามบิน'},
+          {c:coords.KIX,label:'✈',type:'airport',title:'สนามบินนานาชาติคันไซ (KIX)',detail:'THAI 17:35 → กรุงเทพฯ (BKK)'}
+        ],
+        path:[coords.NAMBA,coords.KIX], color:'#5a6476'
+      }
+    };
+  }
+
+  function markerElement(label, type){
+    const el = document.createElement('div');
+    el.className = `google-trip-marker ${type}`;
+    el.textContent = label;
+    return el;
+  }
+
+  function addMarker(p, day){
+    const content = markerElement(p.label, p.type);
+    const marker = new google.maps.marker.AdvancedMarkerElement({
+      map,
+      position:p.c,
+      content,
+      title:p.title
+    });
+
+    marker.addListener('gmp-click', () => {
+      infoWindow.setContent(
+        `<div style="max-width:245px;font-family:system-ui,sans-serif;line-height:1.5">
+           <div style="font-size:10px;font-weight:900;color:#4f6ee8;margin-bottom:4px">${day}</div>
+           <b style="font-size:13px;color:#273247">${p.title}</b>
+           <div style="font-size:11px;color:#697386;margin-top:4px">${p.detail}</div>
+         </div>`
+      );
+      infoWindow.open({anchor:marker,map});
+    });
+
+    markers.push(marker);
+  }
+
+  function clearMap(){
+    markers.forEach(m => m.map = null);
+    markers = [];
+    polylines.forEach(p => p.setMap(null));
+    polylines = [];
+  }
+
+  function render(day='all'){
+    if(!map) return;
+    activeDay = day;
+    clearMap();
+
+    const data = dayData();
+    const days = day === 'all' ? ['13','14','15','16','17','18'] : [day];
+    const bounds = new google.maps.LatLngBounds();
+
+    days.forEach(d => {
+      const item = data[d];
+      item.points.forEach(p => {
+        addMarker(p, `${d} เม.ย. 2027`);
+        bounds.extend(p.c);
+      });
+
+      const line = new google.maps.Polyline({
+        map,
+        path:item.path,
+        geodesic:true,
+        strokeColor:item.color,
+        strokeOpacity:.78,
+        strokeWeight:4,
+        icons:[{
+          icon:{path:'M 0,-1 0,1',strokeOpacity:1,scale:3},
+          offset:'0',
+          repeat:'14px'
+        }]
+      });
+      polylines.push(line);
+      item.path.forEach(c => bounds.extend(c));
+    });
+
+    map.fitBounds(bounds, day === 'all' ? 32 : 48);
+
+    document.querySelectorAll('.map-day-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.mapDay === day);
+    });
+
+    const airport = selectedOutboundAirport();
+    const early = earlyReturn();
+    const status = document.getElementById('map-flight-status');
+    if(status){
+      status.innerHTML = early
+        ? `✈️ <span>อ้างอิงเที่ยวบินที่เลือกตอนนี้: <strong>${airport === 'HND' ? 'ลงสนามบินฮาเนดะ (HND)' : 'ลงสนามบินนาริตะ (NRT)'}</strong> • กลับเช้า VietJet → แนะนำย้ายไปโซน <strong>ริงกุทาวน์ / สนามบินคันไซ</strong> คืนสุดท้าย</span>`
+        : `✈️ <span>อ้างอิงเที่ยวบินที่เลือกตอนนี้: <strong>${airport === 'HND' ? 'ลงสนามบินฮาเนดะ (HND)' : 'ลงสนามบินนาริตะ (NRT)'}</strong> • กลับเย็น THAI → <strong>พักนัมบะต่อคืนสุดท้ายได้</strong> แล้วไปสนามบินคันไซวันที่ 18</span>`;
+    }
+  }
+
+  function initMap(){
+    try{
+      map = new google.maps.Map(mapEl, {
+        center:{lat:35.3,lng:138.5},
+        zoom:5,
+        mapId:'DEMO_MAP_ID',
+        mapTypeControl:false,
+        streetViewControl:false,
+        fullscreenControl:false,
+        cameraControl:false,
+        clickableIcons:false,
+        gestureHandling:'cooperative'
+      });
+
+      infoWindow = new google.maps.InfoWindow();
+      render('all');
+
+      document.querySelectorAll('.map-day-btn').forEach(btn => {
+        btn.addEventListener('click', () => render(btn.dataset.mapDay));
+      });
+
+      document.querySelectorAll('input[name="outbound"], input[name="return"]').forEach(el => {
+        el.addEventListener('change', () => render(activeDay));
+      });
+    }catch(err){
+      showError('เปิด Google Maps ไม่สำเร็จ: ' + (err?.message || err));
+    }
+  }
+})();
+</script>
 </body>
 </html>
