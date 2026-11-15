@@ -12,7 +12,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: pages
   cancel-in-progress: true
 
 jobs:
@@ -31,35 +31,67 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
+          import re
 
           p = Path("index.html")
           s = p.read_text(encoding="utf-8")
 
-          old = """  let map = null;
-          let activeDay = 'all';"""
+          # Add mapEl once, regardless of indentation/spacing.
+          map_el = "const mapEl = document.getElementById('trip-map');"
+          if map_el not in s:
+              s, count = re.subn(
+                  r"(?m)^(\s*)let map\s*=\s*null\s*;",
+                  lambda m: f"{m.group(1)}{map_el}\n{m.group(1)}let map = null;",
+                  s,
+                  count=1
+              )
+              if count != 1:
+                  raise SystemExit("Could not find 'let map = null;' in index.html")
 
-          new = """  const mapEl = document.getElementById('trip-map');
-          let map = null;
-          let activeDay = 'all';"""
+          # Stable AdvancedMarker click event.
+          s = s.replace(
+              "marker.addListener('gmp-click'",
+              "marker.addListener('click'"
+          )
 
-          if new not in s:
-              if old not in s:
-                  raise SystemExit("Google Maps initialization block not found")
-              s = s.replace(old, new, 1)
-
-          s = s.replace("marker.addListener('gmp-click'", "marker.addListener('click'")
+          # Correct error helper name if an older version is present.
+          s = s.replace(
+              "showError('เปิด Google Maps ไม่สำเร็จ:",
+              "showConfigError('เปิด Google Maps ไม่สำเร็จ:"
+          )
 
           p.write_text(s, encoding="utf-8")
-          print("Google Maps initialization patched")
+
+          # Verify the deployed artifact will contain the fix.
+          check = p.read_text(encoding="utf-8")
+          if map_el not in check:
+              raise SystemExit("mapEl patch verification failed")
+
+          print("Google Maps patch OK")
           PY
 
       - name: Create Google Maps config
+        env:
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
         run: |
-          cat > config.js <<'EOF'
-          window.TRIP_CONFIG = {
-            GOOGLE_MAPS_API_KEY: '${{ secrets.GOOGLE_MAPS_API_KEY }}'
-          };
-          EOF
+          if [ -z "$GOOGLE_MAPS_API_KEY" ]; then
+            echo "GOOGLE_MAPS_API_KEY secret is missing"
+            exit 1
+          fi
+
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          key = os.environ["GOOGLE_MAPS_API_KEY"]
+          Path("config.js").write_text(
+              "window.TRIP_CONFIG = {\n"
+              f"  GOOGLE_MAPS_API_KEY: {key!r}\n"
+              "};\n",
+              encoding="utf-8"
+          )
+          print("config.js created")
+          PY
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
