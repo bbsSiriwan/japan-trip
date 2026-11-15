@@ -780,7 +780,6 @@ th{background:#fafaff;font-size:13px;color:#5f6675}
     if (visible[0]) setActive(visible[0].target.id);
   }, {rootMargin:'-25% 0px -55% 0px', threshold:[0.05,0.25,0.5]});
   sections.forEach(s => observer.observe(s));
-  loadGoogleMapsFromConfig();
 })();
 </script>
 
@@ -1089,9 +1088,10 @@ th{background:#fafaff;font-size:13px;color:#5f6675}
         el.addEventListener('change', () => render(activeDay));
       });
     }catch(err){
-      showError('เปิด Google Maps ไม่สำเร็จ: ' + (err?.message || err));
+      showConfigError('เปิด Google Maps ไม่สำเร็จ: ' + (err?.message || err));
     }
   }
+  loadGoogleMapsFromConfig();
 })();
 </script>
 </body>
